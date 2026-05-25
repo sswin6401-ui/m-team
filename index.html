@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쿠M 밴픽랩 (LAB) v5.4.2</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script>tailwind.config = { darkMode: 'class' }</script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght=700;900&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; transition: background-color 0.2s, color 0.2s; background-color: #09090b; overflow: hidden; }
+        .full-height { height: calc(100vh - 150px); }
+        .pick-area { height: calc(50% - 10px); }
+        .glow-purple { box-shadow: 0 0 35px rgba(168, 112, 255, 0.15); }
+        .logo-tight { line-height: 1.0 !important; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen p-3 sm:p-4">
+
+    <div class="w-full space-y-4">
+        <header class="flex flex-col lg:flex-row justify-between items-center bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-lg gap-4">
+            <div class="flex items-center gap-4">
+                <div class="flex flex-col items-center justify-center bg-white text-zinc-950 w-14 h-14 rounded-xl shadow-md shrink-0 border border-slate-200 p-0.5 gap-0 logo-tight">
+                    <span class="text-base font-black text-zinc-950 tracking-tighter" style="margin-bottom: -1px;">쿠팡</span>
+                    <span class="text-base text-[#7c2ae8] font-black tracking-tight" style="margin-top: -1px;">M팀</span>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight flex items-center">
+                        <span class="text-[#7c2ae8] dark:text-[#a870ff]">쿠M 밴픽랩 (LAB)</span>
+                        <span class="text-[10px] font-bold text-zinc-500 ml-3 opacity-60">v5.4.2</span>
+                    </h1>
+                    <div class="flex items-center gap-2 mt-0.5">
+                        <div id="db_status" class="text-[10px] font-black text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">데이터 분석 중...</div>
+                        <div id="sync_status" class="text-[10px] font-black text-slate-400 bg-slate-500/10 px-2.5 py-0.5 rounded-full">클라이언트 미연결</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <div class="flex items-center gap-2 bg-slate-50 dark:bg-zinc-950 px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-inner">
+                    <span class="text-xs font-black text-[#7c2ae8] dark:text-[#a870ff] tracking-wider mr-1 uppercase">Roster:</span>
+                    <div class="flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-sm"><img src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/Warwick.png" class="w-5 h-5 rounded"><span class="text-xs font-black text-slate-800 dark:text-zinc-200">동웍</span></div>
+                    <div class="flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-sm"><img src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/Chogath.png" class="w-5 h-5 rounded"><span class="text-xs font-black text-slate-800 dark:text-zinc-200">홍가스</span></div>
+                    <div class="flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-sm"><img src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/Ashe.png" class="w-5 h-5 rounded"><span class="text-xs font-black text-slate-800 dark:text-zinc-200">형쉬</span></div>
+                    <div class="flex items-center gap-1.5 bg-white dark:bg-zinc-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-sm"><img src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/Ezreal.png" class="w-5 h-5 rounded"><span class="text-xs font-black text-slate-800 dark:text-zinc-200">규즈리얼</span></div>
+                    <div class="flex items-center gap-1.5 border border-dashed border-slate-300 dark:border-zinc-700 px-3 py-1 rounded-lg opacity-50"><i class="fa-solid fa-user-plus text-xs text-slate-400"></i><span class="text-xs font-bold text-slate-400 tracking-tighter">추가예정</span></div>
+                </div>
+
+                <div class="flex items-center gap-2 bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
+                    <span class="text-sm font-black text-slate-500 dark:text-zinc-400">라인:</span>
+                    <select id="my_position" onchange="changePosition()" class="bg-transparent text-sm font-black text-[#7c2ae8] dark:text-[#a870ff] focus:outline-none cursor-pointer">
+                        <option value="탑">탑 (TOP)</option><option value="정글">정글 (JUG)</option><option value="미드">미드 (MID)</option><option value="원딜">원딜 (ADC)</option><option value="서폿">서폿 (SUP)</option>
+                    </select>
+                </div>
+                <button onclick="toggleTheme()" class="bg-slate-200 hover:bg-slate-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-800 dark:text-zinc-200 font-black text-xs px-4 py-2.5 rounded-xl transition border border-slate-300 dark:border-zinc-700"><i class="fa-solid fa-circle-half-stroke mr-1"></i> 모드</button>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-12 gap-4 w-full full-height">
+            <div class="col-span-12 lg:col-span-9 flex flex-col gap-4 h-full">
+                <div class="pick-area bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800/80 p-5 rounded-2xl shadow-xl border-l-[12px] border-l-blue-500 flex flex-col overflow-hidden">
+                    <h2 class="text-xl font-black text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-2"><i class="fa-solid fa-shield-halved"></i> 아군 픽 현황</h2>
+                    <div class="grid grid-cols-5 gap-3 flex-1 items-center h-full">
+                        <div id="wrapper_our_탑" class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-blue-500 dark:border-zinc-800 dark:focus-within:border-blue-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Top</label>
+                            <img id="img_our_탑" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="our_탑" oninput="updateSlotIcon('our_탑'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div id="wrapper_our_정글" class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-blue-500 dark:border-zinc-800 dark:focus-within:border-blue-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Jungle</label>
+                            <img id="img_our_정글" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="our_정글" oninput="updateSlotIcon('our_정글'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div id="wrapper_our_미드" class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-blue-500 dark:border-zinc-800 dark:focus-within:border-blue-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Mid</label>
+                            <img id="img_our_미드" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="our_미드" oninput="updateSlotIcon('our_미드'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div id="wrapper_our_원딜" class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-blue-500 dark:border-zinc-800 dark:focus-within:border-blue-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Adc</label>
+                            <img id="img_our_원딜" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="our_원딜" oninput="updateSlotIcon('our_원딜'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div id="wrapper_our_서폿" class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-blue-500 dark:border-zinc-800 dark:focus-within:border-blue-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Support</label>
+                            <img id="img_our_서폿" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="our_서폿" oninput="updateSlotIcon('our_서폿'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pick-area bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800/80 p-5 rounded-2xl shadow-xl border-l-[12px] border-l-red-500 flex flex-col overflow-hidden">
+                    <h2 class="text-xl font-black text-red-600 dark:text-red-400 mb-2 flex items-center gap-2"><i class="fa-solid fa-skull"></i> 적군 픽 현황</h2>
+                    <div class="grid grid-cols-5 gap-3 flex-1 items-center h-full">
+                        <div class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-red-500 dark:border-zinc-800 dark:focus-within:border-red-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Enemy Top</label>
+                            <img id="img_enemy_탑" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="enemy_탑" oninput="updateSlotIcon('enemy_탑'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-red-500 dark:border-zinc-800 dark:focus-within:border-red-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Enemy Jug</label>
+                            <img id="img_enemy_정글" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="enemy_정글" oninput="updateSlotIcon('enemy_정글'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-red-500 dark:border-zinc-800 dark:focus-within:border-red-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Enemy Mid</label>
+                            <img id="img_enemy_미드" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="enemy_미드" oninput="updateSlotIcon('enemy_미드'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-red-500 dark:border-zinc-800 dark:focus-within:border-red-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Enemy Adc</label>
+                            <img id="img_enemy_원딜" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="enemy_원딜" oninput="updateSlotIcon('enemy_원딜'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                        <div class="bg-slate-50 dark:bg-black/40 h-44 p-4 rounded-xl border border-slate-300 focus-within:border-red-500 dark:border-zinc-800 dark:focus-within:border-red-500 border-2 transition flex flex-col justify-center items-center">
+                            <label class="text-[11px] font-black text-slate-400 dark:text-zinc-500 mb-2 uppercase tracking-widest">Enemy Sup</label>
+                            <img id="img_enemy_서폿" src="https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png" class="w-16 h-16 rounded-xl border-2 border-slate-300 dark:border-zinc-800 mb-2 object-cover shadow-sm">
+                            <input type="text" id="enemy_서폿" oninput="updateSlotIcon('enemy_서폿'); calculate()" placeholder="입력" class="w-full bg-transparent text-center text-base font-black text-slate-900 dark:text-white focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-2xl shadow-2xl flex flex-col h-full glow-purple overflow-hidden">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-zinc-800 pb-3">
+                    <h2 class="text-xl font-black text-[#7c2ae8] dark:text-amber-400 flex items-center gap-2"><i class="fa-solid fa-crown text-amber-500"></i> 추천 전략 픽</h2>
+                    <button onclick="resetInputs()" class="text-[10px] font-black bg-slate-100 hover:bg-red-500 hover:text-white dark:bg-zinc-800 dark:hover:bg-red-600 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 transition">리셋</button>
+                </div>
+                <div id="result" class="flex-1 overflow-y-auto space-y-2.5 pr-1">
+                    <div class="text-slate-500 dark:text-zinc-400 font-bold text-center py-52 text-xs leading-relaxed italic opacity-50">상황을 입력하면 실시간으로<br>최적의 카운터픽을 추천합니다.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const N8N_URL = 'http://localhost:5678/webhook/mteam-db';
+        const YUNARA_ICON = 'https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/588.png'; 
+
+        const championMap = {
+            "가렌":"Garen","갈리오":"Galio","갱플랭크":"Gangplank","그라가스":"Gragas","그레이브즈":"Graves","그웬":"Gwen","나르":"Gnar","나미":"Nami","나서스":"Nasus","나피리":"Naafiri","노틸러스":"Nautilus","녹턴":"Nocturne","누누":"Nunu","니달리":"Nidalee","니코":"Neeko","닐라":"Nilah","다리우스":"Darius","다이애나":"Diana","드레이븐":"Draven","라이즈":"Ryze","라칸":"Rakan","람머스":"Rammus","럭스":"Lux","럼블":"Rumble","레나타":"Renata","레넥톤":"Renekton","레오나": "Leona","렉사이":"RekSai","렐":"Rell","렝가":"Rengar","루시안":"Lucian","룰루":"Lulu","르블랑":"Leblanc","르블":"Leblanc","리 신":"LeeSin","리신":"LeeSin","리븐":"Riven","리산드라":"Lissandra","릴리아":"Lillia","마스터이":"MasterYi","마이":"MasterYi","마오카이":"Maokai","말자하":"Malzahar","말파이트":"Malphite","멜":"Mel","모데카이저":"Mordekaiser","모르가나":"Morgana","문도":"DrMundo","미스포츈":"MissFortune","미포":"MissFortune","밀리오":"Milio","바드":"Bard","바루스":"Varus","바이":"Vi","베이가":"Veigar","베인":"Vayne","벡스":"Vex","벨베스":"Belveth","벨코즈":"Velkoz","볼리베어":"Volibear","브라움":"Braum","브라이어":"Briar","브랜드":"Brand","블라디미르":"Vladimir","블리츠크랭크":"Blitzcrank","블리츠":"Blitzcrank","비에고":"Viego","빅토르":"Viktor","뽀삐":"Poppy","사미라":"Samira","사이온":"Sion","사일러스":"Sylas","샤코":"Shaco","세나":"Senna","세라핀":"Seraphine","세주아니":"Sejuani","세트":"Sett","소나":"Sona","소라카":"Soraka","쉔":"Shen","쉬바나":"Shyvana","스몰더":"Smolder","스웨인":"Swain","스카너":"Skarner","시비르":"Sivir","신짜오":"XinZhao","신드라":"Syndra","신지드":"Singed","쓰레쉬":"Thresh","아리":"Ahri","아무무":"Amumu","아우렐리온솔":"AurelionSol","아솔":"AurelionSol","아이번":"Ivern","아지르":"Azir","아칼리":"Akali","아크샨":"Akshan","아트록스":"Aatrox","아펠리오스":"Aphelios","알리스타":"Alistar","암베사":"Ambessa","애니":"Annie","애니비아":"Anivia","애쉬":"Ashe","야스오":"Yasuo","에코":"Ekko","엘리스":"Elise","오공":"MonkeyKing","오로라":"Aurora","오른":"Ornn","오리아나":"Orianna",
+            "올라프":"Olaf","요네":"Yone","요릭":"Yorick","우디르":"Udyr","우르곳":"Urgot","워윅":"Warwick","유미":"Yuumi","유나라":"Yunara","이렐리아":"Irelia","이렐":"Irelia","이블린":"Evelynn","이즈리얼":"Ezreal","이즈":"Ezreal","일라오이":"Illaoi","자르반4세":"JarvanIV","자르반":"JarvanIV","자야":"Xayah","자이라":"Zyra","자크":"Zac","자헨":"Jahen","잔나":"Janna","잭스":"Jax","제드":"Zed","제라스":"Xerath","제리":"Zeri","제이스":"Jayce","조이":"Zoe","직스":"Ziggs","진":"Jhin","질리언":"Zilean","징크스":"Jinx","초가스":"Chogath","카르마":"Karma","카밀":"Camille","카사딘":"Kassadin","카서스":"Karthus","카시오페아":"Cassiopeia","카시":"Cassiopeia","카이사":"Kaisa","카직스":"Khazix","카타리나":"Katarina","카타":"Katarina","칼리스타":"Kalista","케넨":"Kennen","케이틀린":"Caitlyn","케인":"Kayn","케일":"Kayle","코그모":"KogMaw","코르키":"Corki","퀸":"Quinn","크산테":"KSante","클레드":"Kled","키아나":"Qiyana","킨드레드":"Kindred","타릭":"Taric","탈론":"Talon","탈리야":"Taliyah","탐켄치":"TahmKench","트런들":"Trundle","트리스타나":"Tristana","트린다미어":"Tryndamere","트위스티드페이트":"TwistedFate","트페":"TwistedFate","트위치":"Twitch","티모":"Teemo","파이크":"Pyke","판테온":"Pantheon",
+            "피들스틱":"Fiddlesticks","피오라":"Fiora","피즈":"Fizz","하이머딩거":"Heimerdinger","딩거":"Heimerdinger","헤카림":"Hecarim","흐웨이":"Hwei"
+        };
+        
+        const roles = ['탑', '정글', '미드', '원딜', '서폿'];
+        let rawDatabaseLines = [];
+
+        window.onload = function() {
+            if (localStorage.getItem('banpick_theme') === 'light') document.documentElement.classList.remove('dark');
+            const savedPosition = localStorage.getItem('banpick_position');
+            document.getElementById('my_position').value = savedPosition && roles.includes(savedPosition) ? savedPosition : '탑';
+            changePosition(); 
+            loadCloudDatabase();
+            startLocalServerListener();
+        }
+
+        function loadCloudDatabase() {
+            const dbStatusEl = document.getElementById('db_status');
+            const cacheUrl = `${N8N_URL}?t=${new Date().getTime()}`;
+            fetch(cacheUrl).then(res => res.text()).then(rawText => {
+                let csvText = rawText;
+                try {
+                    const parsed = JSON.parse(rawText);
+                    if (Array.isArray(parsed) && parsed.length > 0) { csvText = parsed[0].data || parsed[0][Object.keys(parsed[0])[0]]; }
+                } catch(e) {}
+                rawDatabaseLines = [];
+                const lines = csvText.split(/\r?\n/);
+                if(lines.length > 1) {
+                    for(let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim(); if(!line) continue;
+                        let parts = []; let current = ''; let inQuotes = false;
+                        for(let j=0; j<line.length; j++) {
+                            let char = line[j];
+                            if(char === '"') { inQuotes = !inQuotes; }
+                            else if(char === ',' && !inQuotes) { parts.push(current.trim()); current = ''; }
+                            else { current += char; }
+                        }
+                        parts.push(current.trim()); rawDatabaseLines.push(parts);
+                    }
+                }
+                dbStatusEl.className = "text-xs font-black text-emerald-500 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20";
+                dbStatusEl.innerHTML = "DB 동기화 완료"; calculate();
+            }).catch(err => {
+                dbStatusEl.className = "text-xs font-black text-red-500 bg-red-500/10 px-3 py-0.5 rounded-full border border-red-500/20";
+                dbStatusEl.innerHTML = "DB 로드 실패";
+            });
+        }
+
+        function startLocalServerListener() {
+            const statusEl = document.getElementById('sync_status');
+            setInterval(() => {
+                fetch('http://localhost:5882/get_lol_data').then(res => res.json()).then(data => {
+                    if (data.active) {
+                        statusEl.className = "text-xs font-black text-emerald-500 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20 shadow-sm";
+                        statusEl.innerHTML = "롤 연동 중";
+                        
+                        if (data.myPosition && roles.includes(data.myPosition)) {
+                            const currentSelect = document.getElementById('my_position').value;
+                            if (currentSelect !== data.myPosition) {
+                                document.getElementById('my_position').value = data.myPosition;
+                                changePosition();
+                            }
+                        }
+
+                        const myPos = document.getElementById('my_position').value;
+                        roles.forEach(r => {
+                            if(r === myPos) return; 
+                            if(data.our[r] !== undefined && document.getElementById('our_'+r)) { document.getElementById('our_'+r).value = data.our[r]; updateSlotIcon('our_'+r); }
+                            if(data.enemy[r] !== undefined) { document.getElementById('enemy_'+r).value = data.enemy[r]; updateSlotIcon('enemy_'+r); }
+                        });
+                        calculate();
+                    }
+                }).catch(err => {
+                    statusEl.className = "text-[10px] font-black text-slate-400 bg-slate-500/10 px-2.5 py-0.5 rounded-full border border-slate-500/20";
+                    statusEl.innerHTML = "클라이언트 미연결";
+                });
+            }, 1000);
+        }
+
+        function getStandardName(inputVal) {
+            let clean = inputVal.replace(/\s+/g, '').trim();
+            if (clean === "유나라" || clean.toLowerCase() === "yunara") return "Yunara";
+            if (clean === "규즈리얼" || clean === "규나" || clean.toLowerCase() === "gyuzreal") return "Ezreal";
+            if (clean === "멜" || clean.toLowerCase() === "mel") return "Mel";
+            if (clean === "크산테") return "크산테";
+            for (const [key, value] of Object.entries(championMap)) {
+                if (key.replace(/\s+/g, '') === clean) {
+                    for (const [realName, engName] of Object.entries(championMap)) {
+                        if (engName === value && realName.length > 2 && !["자르반","신짜오","마스터이"].includes(realName)) return realName;
+                    }
+                    return key; 
+                }
+            }
+            return inputVal;
+        }
+
+        function updateSlotIcon(id) {
+            let rawVal = document.getElementById(id).value.trim();
+            const imgEl = document.getElementById('img_' + id);
+            const fallbackImg = "https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png";
+            if (!rawVal) { imgEl.src = fallbackImg; return; }
+            let stdName = getStandardName(rawVal);
+            if (stdName === "Yunara") imgEl.src = YUNARA_ICON;
+            else if(championMap[stdName]) imgEl.src = `https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/${championMap[stdName]}.png`;
+            else imgEl.src = fallbackImg;
+        }
+
+        function toggleTheme() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('banpick_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        }
+
+        function changePosition() {
+            const currentPos = document.getElementById('my_position').value;
+            localStorage.setItem('banpick_position', currentPos);
+            roles.forEach(role => {
+                const wrapper = document.getElementById(`wrapper_our_${role}`);
+                if(role.includes(currentPos)) { wrapper.classList.add('hidden'); } 
+                else { wrapper.classList.remove('hidden'); }
+            });
+            calculate();
+        }
+
+        function calculate() {
+            const myPos = document.getElementById('my_position').value;
+            let condIdx = 0; let pickIdx = 1;
+            if (myPos.includes('정글')) { condIdx = 3; pickIdx = 4; }
+            else if (myPos.includes('미드')) { condIdx = 6; pickIdx = 7; }
+            else if (myPos.includes('원딜')) { condIdx = 9; pickIdx = 10; }
+            else if (myPos.includes('서폿')) { condIdx = 12; pickIdx = 13; }
+            
+            const inputs = [];
+            roles.forEach(role => {
+                const oVal = document.getElementById(`our_${role}`).value.trim();
+                const eVal = document.getElementById(`enemy_${role}`).value.trim();
+                if (oVal && !myPos.includes(role)) inputs.push(`우리${getStandardName(oVal)}(${role})`);
+                if (eVal) inputs.push(`적${getStandardName(eVal)}(${role})`);
+            });
+            const counts = {};
+            rawDatabaseLines.forEach(row => {
+                if (row.length <= condIdx) return;
+                const sheetCondition = (row[condIdx] || '').replace(/\s+/g, '');
+                if (!sheetCondition) return;
+                inputs.forEach(val => {
+                    const searchKey = val.replace(/\s+/g, '');
+                    if (sheetCondition === searchKey) {
+                        const rawPicks = row[pickIdx] || '';
+                        const matches = rawPicks.split(',').map(v => v.trim()).filter(v => v);
+                        matches.forEach((champ, index) => {
+                            if (!counts[champ]) { counts[champ] = { score: 0, priority: 0 }; }
+                            counts[champ].score += 1; counts[champ].priority += (100 - index);
+                        });
+                    }
+                });
+            });
+            const sorted = Object.entries(counts).sort((a, b) => b[1].score !== a[1].score ? b[1].score - a[1].score : b[1].priority - a[1].priority);
+            const resultDiv = document.getElementById('result');
+            if (sorted.length === 0) {
+                resultDiv.innerHTML = `<div class="text-slate-500 dark:text-zinc-600 font-bold text-center py-52 text-xs leading-relaxed italic">현재 매칭되는 데이터가 없습니다.<br>시트에서 [${myPos}] 열을 확인해 주세요.</div>`;
+                return;
+            }
+            let html = '';
+            sorted.forEach(([champ, data], index) => {
+                const score = data.score; let isGlow = score >= 2;
+                let cardClass = 'bg-slate-50 border-slate-200 dark:bg-zinc-950 dark:border-zinc-800 text-slate-900 dark:text-zinc-100';
+                let badgeClass = 'bg-slate-300 text-slate-700 dark:bg-zinc-800 dark:text-zinc-400';
+                if (isGlow) { cardClass = 'bg-amber-100 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50 text-amber-900 dark:text-amber-400 font-extrabold'; badgeClass = 'bg-amber-500 text-white'; }
+                let stdChampName = getStandardName(champ.trim());
+                const fallbackImg = "https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png";
+                const engName = championMap[stdChampName];
+                let imgUrl = stdChampName === "Yunara" ? YUNARA_ICON : (engName ? `https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/${engName}.png` : fallbackImg);
+                html += `<div class="flex justify-between items-center border p-3 rounded-xl shadow-sm ${cardClass}"><div class="flex items-center gap-4"><span class="text-base font-black text-slate-400 dark:text-zinc-500 w-6 text-center">${index + 1}</span><img src="${imgUrl}" class="w-12 h-12 rounded-lg border border-slate-300 dark:text-zinc-700 object-cover shadow-inner"><span class="text-lg font-black tracking-wide">${champ}</span></div><span class="text-xs px-3 py-1.5 rounded-md font-mono font-black ${badgeClass}">${score}개 일치</span></div>`;
+            });
+            resultDiv.innerHTML = html;
+        }
+
+        function resetInputs() {
+            roles.forEach(role => {
+                const ourEl = document.getElementById(`our_${role}`); if (ourEl) { ourEl.value = ''; updateSlotIcon(`our_${role}`); }
+                const enemyEl = document.getElementById(`enemy_${role}`); if (enemyEl) { enemyEl.value = ''; updateSlotIcon(`enemy_${role}`); }
+            });
+            calculate();
+        }
+    </script>
+</body>
+</html>
