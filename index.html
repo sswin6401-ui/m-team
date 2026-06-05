@@ -153,7 +153,7 @@
     </div>
 
     <script>
-        const N8N_URL = 'https://quicksand-briskness-charity.ngrok-free.dev/webhook/mteam-db';
+        const N8N_URL = 'http://localhost:5678/webhook/mteam-db';
         const YUNARA_ICON = 'https://i.imgur.com/0Ies8zK.png'; 
         const MEL_ICON = 'https://i.imgur.com/A50O0KG.png';
         const JAHEN_ICON = 'https://i.imgur.com/c2yKGaZ.png';        
@@ -171,113 +171,71 @@
             const savedPosition = localStorage.getItem('banpick_position');
             document.getElementById('my_position').value = savedPosition && roles.includes(savedPosition) ? savedPosition : '탑';
             changePosition(); 
-            function loadCloudDatabase() {
-            const dbStatusEl = document.getElementById('db_status');
-            const cacheUrl = `${N8N_URL}?t=${new Date().getTime()}`;
-            
-            const headers = { 'ngrok-skip-browser-warning': 'true' };
-
-            fetch(cacheUrl, { headers }).then(res => res.text()).then(rawText => {
-                let csvText = rawText;
-                rawDatabaseLines = [];
-
-                // [최종 해결] 휴대폰 주소창에 뜬 [{"조건":"적 리 신", "추천픽":"우르곳"}] 포맷 완벽 해체
-                try {
-                    const parsed = JSON.parse(rawText);
-                    // 배열 형태라면 내부 데이터를 한 줄씩 정밀 조각냅니다.
-                    const dataArray = Array.isArray(parsed) ? parsed : (parsed.data ? JSON.parse(parsed.data) : []);
-                    
-                    if (Array.isArray(dataArray) && dataArray.length > 0) {
-                        dataArray.forEach(item => {
-                            // 각 행에서 '조건'과 '추천픽' 값만 쏙 빼내서 저장합니다.
-                            let conditionVal = item.조건 || item.condition || "";
-                            let pickVal = item.추천픽 || item.pick || "";
-                            
-                            if (conditionVal && !conditionVal.includes("조건")) {
-                                // 기존 코드의 계산 방식에 맞게 [조건, 추천픽] 배열 형태로 변환하여 삽입
-                                rawDatabaseLines.push([conditionVal.trim(), pickVal.trim()]);
-                            }
-                        });
-                    }
-                } catch(e) {
-                    // 혹시라도 쌩 텍스트(CSV)로 들어올 때를 대비한 백업용 가공 코드
-                    const cleanText = csvText.replace(/ /g, '').replace(/\\r\\n/g, '\n').replace(/\r\n/g, '\n');
-                    const lines = cleanText.split('\n');
-                    for(let i = 0; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if(!line || line.startsWith('조건') || line.startsWith('"조건')) continue;
-                        let parts = line.split(',').map(p => p.replace(/[\[\]"'{}]/g, '').trim());
-                        if (parts.length >= 2) rawDatabaseLines.push(parts);
-                    }
-                }
-                
-                console.log("정상 로드된 총 데이터 행 수:", rawDatabaseLines.length);
-                
-                dbStatusEl.className = "text-xs font-black text-emerald-500 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20";
-                dbStatusEl.innerHTML = "DB 동기화 완료"; 
-                calculate();
-            }).catch(err => {
-                dbStatusEl.className = "text-xs font-black text-red-500 bg-red-500/10 px-3 py-0.5 rounded-full border border-red-500/20";
-                dbStatusEl.innerHTML = "DB 로드 실패";
-                console.error(err);
-            });
-        }
+            loadCloudDatabase();
             startLocalServerListener();
         }
 
         function loadCloudDatabase() {
             const dbStatusEl = document.getElementById('db_status');
-            // ngrok 헤더를 아예 빼고 브라우저 캐시만 사용해서 최대한 단순하게 호출
             const cacheUrl = `${N8N_URL}?t=${new Date().getTime()}`;
-            
-            fetch(cacheUrl)
-                .then(res => res.text())
-                .then(rawText => {
-                    // JSON 껍데기 제거 로직 (더 안전하게)
-                    let csvText = rawText;
-                    if (rawText.startsWith('[')) {
-                        try {
-                            const parsed = JSON.parse(rawText);
-                            csvText = parsed[0].data || "";
-                        } catch(e) {}
+            fetch(cacheUrl).then(res => res.text()).then(rawText => {
+                let csvText = rawText;
+                try {
+                    const parsed = JSON.parse(rawText);
+                    if (Array.isArray(parsed) && parsed.length > 0) { csvText = parsed[0].data || parsed[0][Object.keys(parsed[0])[0]]; }
+                } catch(e) {}
+                rawDatabaseLines = [];
+                const lines = csvText.split(/\r?\n/);
+                if(lines.length > 1) {
+                    for(let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim(); if(!line) continue;
+                        let parts = []; let current = ''; let inQuotes = false;
+                        for(let j=0; j<line.length; j++) {
+                            let char = line[j];
+                            if(char === '"') { inQuotes = !inQuotes; }
+                            else if(char === ',' && !inQuotes) { parts.push(current.trim()); current = ''; }
+                            else { current += char; }
+                        }
+                        parts.push(current.trim()); rawDatabaseLines.push(parts);
                     }
-                    
-                    rawDatabaseLines = [];
-                    const lines = csvText.replace(/\\r\\n/g, '\n').replace(/\r\n/g, '\n').split('\n');
-                    
-                    for(let i = 0; i < lines.length; i++) {
-                        let line = lines[i].trim();
-                        if(!line || line.startsWith('조건')) continue;
-                        rawDatabaseLines.push(line.split(',').map(s => s.trim()));
-                    }
-                    dbStatusEl.innerHTML = "DB 동기화 완료";
-                    dbStatusEl.className = "text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20";
-                    calculate();
-                })
-                .catch(err => {
-                    dbStatusEl.innerHTML = "DB 로드 실패";
-                    dbStatusEl.className = "text-[10px] font-black text-red-500 bg-red-500/10 px-2.5 py-0.5 rounded-full border border-red-500/20";
-                });
+                }
+                dbStatusEl.className = "text-xs font-black text-emerald-500 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20";
+                dbStatusEl.innerHTML = "DB 동기화 완료"; calculate();
+            }).catch(err => {
+                dbStatusEl.className = "text-xs font-black text-red-500 bg-red-500/10 px-3 py-0.5 rounded-full border border-red-500/20";
+                dbStatusEl.innerHTML = "DB 로드 실패";
+            });
         }
 
         function startLocalServerListener() {
             const statusEl = document.getElementById('sync_status');
-            // 롤 연동 프로그램이 안 켜져 있으면 에러 무시하고 조용히 넘어가기 (무한 루프 방지)
             setInterval(() => {
-                fetch('http://localhost:5882/get_lol_data')
-                    .then(res => res.json())
-                    .then(data => {
-                        // 롤 연동 성공 시에만 동작
-                        if (data.active) {
-                            statusEl.innerHTML = "롤 연동 중";
-                            // (연동 로직 생략)
+                fetch('http://localhost:5882/get_lol_data').then(res => res.json()).then(data => {
+                    if (data.active) {
+                        statusEl.className = "text-xs font-black text-emerald-500 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20 shadow-sm";
+                        statusEl.innerHTML = "롤 연동 중";
+                        
+                        if (data.myPosition && roles.includes(data.myPosition)) {
+                            const currentSelect = document.getElementById('my_position').value;
+                            if (currentSelect !== data.myPosition) {
+                                document.getElementById('my_position').value = data.myPosition;
+                                changePosition();
+                            }
                         }
-                    })
-                    .catch(() => {
-                        // 여기서 에러를 잡아야(catch) 콘솔에 빨간 글씨가 안 뜹니다!
-                        statusEl.innerHTML = "클라이언트 미연결";
-                    });
-            }, 3000); // 1초에서 3초로 딜레이를 늘려 브라우저 부하 감소
+
+                        const myPos = document.getElementById('my_position').value;
+                        roles.forEach(r => {
+                            if(r === myPos) return; 
+                            if(data.our[r] !== undefined && document.getElementById('our_'+r)) { document.getElementById('our_'+r).value = data.our[r]; updateSlotIcon('our_'+r); }
+                            if(data.enemy[r] !== undefined) { document.getElementById('enemy_'+r).value = data.enemy[r]; updateSlotIcon('enemy_'+r); }
+                        });
+                        calculate();
+                    }
+                }).catch(err => {
+                    statusEl.className = "text-[10px] font-black text-slate-400 bg-slate-500/10 px-2.5 py-0.5 rounded-full border border-slate-500/20";
+                    statusEl.innerHTML = "클라이언트 미연결";
+                });
+            }, 1000);
         }
 
         function getStandardName(inputVal) {
