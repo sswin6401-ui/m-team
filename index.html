@@ -172,56 +172,56 @@
             document.getElementById('my_position').value = savedPosition && roles.includes(savedPosition) ? savedPosition : '탑';
             changePosition(); 
             function loadCloudDatabase() {
-    const dbStatusEl = document.getElementById('db_status');
-    const cacheUrl = `${N8N_URL}?t=${new Date().getTime()}`;
-
-    // ngrok 경고창을 통과하는 마법의 헤더
-    const headers = { 'ngrok-skip-browser-warning': 'true' };
-
-    fetch(cacheUrl, { headers })
-        .then(res => res.text())
-        .then(rawText => {
-            let csvText = rawText;
-
-            // [파싱 필살기 1] JSON 껍데기 벗기기
-            try {
-                let parsed = JSON.parse(rawText);
-                // n8n 데이터 구조에 따라 data 속성 찾기
-                if (Array.isArray(parsed)) parsed = parsed[0];
-                if (parsed.data) csvText = parsed.data;
-                else csvText = JSON.stringify(parsed);
-            } catch (e) {
-                // 이미 텍스트면 그냥 통과
-            }
-
-            // [파싱 필살기 2] 유령 문자 제거 및 줄바꿈 통일
-            // 데이터 내의 특수문자, 따옴표 등을 싹 세탁합니다.
-            csvText = csvText.replace(/\\r\\n/g, '\n').replace(/\\"/g, '"').replace(/"/g, '');
+            const dbStatusEl = document.getElementById('db_status');
+            const cacheUrl = `${N8N_URL}?t=${new Date().getTime()}`;
             
-            rawDatabaseLines = [];
-            const lines = csvText.split('\n');
-            
-            for (let line of lines) {
-                line = line.trim();
-                if (!line || line.includes("조건") || line.includes("추천픽")) continue;
-                
-                let parts = line.split(',').map(s => s.trim());
-                if (parts.length >= 2) {
-                    rawDatabaseLines.push(parts);
+            const headers = { 'ngrok-skip-browser-warning': 'true' };
+
+            fetch(cacheUrl, { headers }).then(res => res.text()).then(rawText => {
+                let csvText = rawText;
+                rawDatabaseLines = [];
+
+                // [최종 해결] 휴대폰 주소창에 뜬 [{"조건":"적 리 신", "추천픽":"우르곳"}] 포맷 완벽 해체
+                try {
+                    const parsed = JSON.parse(rawText);
+                    // 배열 형태라면 내부 데이터를 한 줄씩 정밀 조각냅니다.
+                    const dataArray = Array.isArray(parsed) ? parsed : (parsed.data ? JSON.parse(parsed.data) : []);
+                    
+                    if (Array.isArray(dataArray) && dataArray.length > 0) {
+                        dataArray.forEach(item => {
+                            // 각 행에서 '조건'과 '추천픽' 값만 쏙 빼내서 저장합니다.
+                            let conditionVal = item.조건 || item.condition || "";
+                            let pickVal = item.추천픽 || item.pick || "";
+                            
+                            if (conditionVal && !conditionVal.includes("조건")) {
+                                // 기존 코드의 계산 방식에 맞게 [조건, 추천픽] 배열 형태로 변환하여 삽입
+                                rawDatabaseLines.push([conditionVal.trim(), pickVal.trim()]);
+                            }
+                        });
+                    }
+                } catch(e) {
+                    // 혹시라도 쌩 텍스트(CSV)로 들어올 때를 대비한 백업용 가공 코드
+                    const cleanText = csvText.replace(/ /g, '').replace(/\\r\\n/g, '\n').replace(/\r\n/g, '\n');
+                    const lines = cleanText.split('\n');
+                    for(let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if(!line || line.startsWith('조건') || line.startsWith('"조건')) continue;
+                        let parts = line.split(',').map(p => p.replace(/[\[\]"'{}]/g, '').trim());
+                        if (parts.length >= 2) rawDatabaseLines.push(parts);
+                    }
                 }
-            }
-
-            console.log("파싱 성공, 로드된 행 수:", rawDatabaseLines.length);
-            dbStatusEl.innerHTML = "DB 동기화 완료";
-            dbStatusEl.className = "text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20";
-            calculate();
-        })
-        .catch(err => {
-            console.error("파싱 에러:", err);
-            dbStatusEl.innerHTML = "DB 로드 실패";
-            dbStatusEl.className = "text-[10px] font-black text-red-500 bg-red-500/10 px-2.5 py-0.5 rounded-full border border-red-500/20";
-        });
-}
+                
+                console.log("정상 로드된 총 데이터 행 수:", rawDatabaseLines.length);
+                
+                dbStatusEl.className = "text-xs font-black text-emerald-500 bg-emerald-500/10 px-3 py-0.5 rounded-full border border-emerald-500/20";
+                dbStatusEl.innerHTML = "DB 동기화 완료"; 
+                calculate();
+            }).catch(err => {
+                dbStatusEl.className = "text-xs font-black text-red-500 bg-red-500/10 px-3 py-0.5 rounded-full border border-red-500/20";
+                dbStatusEl.innerHTML = "DB 로드 실패";
+                console.error(err);
+            });
+        }
             startLocalServerListener();
         }
 
