@@ -1666,10 +1666,10 @@
         function getStandardName(inputVal) {
             let clean = inputVal.replace(/\s+/g, '').trim();
             if (clean === "문도박사") return "문도";
-            if (clean === "유나라" || clean.toLowerCase() === "yunara") return "Yunara";
+            if (clean === "유나라" || clean.toLowerCase() === "yunara") return "유나라"; // ◀ Yunara에서 한글로 변경
             if (clean === "규즈리얼" || clean === "규나" || clean.toLowerCase() === "gyuzreal") return "Ezreal";
-            if (clean === "멜" || clean.toLowerCase() === "mel") return "Mel";
-            if (clean === "자헨" || clean.toLowerCase() === "jahen") return "Jahen";
+            if (clean === "멜" || clean.toLowerCase() === "mel") return "멜";         // ◀ Mel에서 한글로 변경
+            if (clean === "자헨" || clean.toLowerCase() === "jahen") return "자헨";     // ◀ Jahen에서 한글로 변경
             if (clean === "크산테") return "크산테";
             if (clean === "누누와윌럼프" || clean === "누누와윌럼프") return "누누와 윌럼프";
 
@@ -1690,9 +1690,10 @@
             const fallbackImg = "https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png";
             if (!rawVal) { imgEl.src = fallbackImg; return; }
             let stdName = getStandardName(rawVal);
-            if (stdName === "Yunara") imgEl.src = YUNARA_ICON;
-            else if (stdName === "Mel") imgEl.src = MEL_ICON;
-            else if (stdName === "Jahen") imgEl.src = JAHEN_ICON;
+    
+            if (stdName === "유나라") imgEl.src = YUNARA_ICON;  // ◀ Yunara -> 유나라
+            else if (stdName === "멜") imgEl.src = MEL_ICON;    // ◀ Mel -> 멜
+            else if (stdName === "자헨") imgEl.src = JAHEN_ICON; // ◀ Jahen -> 자헨
             else if (championMap[stdName]) imgEl.src = `https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/${championMap[stdName]}.png`;
             else imgEl.src = fallbackImg;
         }
@@ -1789,14 +1790,15 @@
                 let badgeClass = 'bg-slate-300 text-slate-700 dark:bg-zinc-800 dark:text-zinc-400';
                 if (isGlow) { cardClass = 'bg-amber-100 border-amber-300 dark:bg-amber-950/40 dark:border-amber-700/50 text-amber-900 dark:text-amber-400 font-extrabold'; badgeClass = 'bg-amber-500 text-white'; }
                 
+                // calculate 함수 내부 하단 처리 기능 중 이미지 경로 지정 부분
                 let stdChampName = getStandardName(champ.trim());
                 const fallbackImg = "https://ddragon.leagueoflegends.com/cdn/14.22.1/img/profileicon/29.png";
                 const engName = championMap[stdChampName];
-                
+
                 let imgUrl = fallbackImg;
-                if (stdChampName === "Yunara") imgUrl = YUNARA_ICON;
-                else if (stdChampName === "Mel") imgUrl = MEL_ICON;
-                else if (stdChampName === "Jahen") imgUrl = JAHEN_ICON;
+                if (stdChampName === "유나라") imgUrl = YUNARA_ICON;  // ◀ Yunara -> 유나라
+                else if (stdChampName === "멜") imgUrl = MEL_ICON;    // ◀ Mel -> 멜
+                else if (stdChampName === "자헨") imgUrl = JAHEN_ICON; // ◀ Jahen -> 자헨
                 else if (engName) imgUrl = `https://ddragon.leagueoflegends.com/cdn/14.22.1/img/champion/${engName}.png`;
                 
                 html += `<div class="flex justify-between items-center border p-3 rounded-xl shadow-sm ${cardClass}"><div class="flex items-center gap-4"><span class="text-base font-black text-slate-400 dark:text-zinc-500 w-6 text-center">${index + 1}</span><img src="${imgUrl}" class="w-12 h-12 rounded-lg border border-slate-300 dark:text-zinc-700 object-cover shadow-inner"><span class="text-lg font-black tracking-wide">${champ}</span></div><span class="text-xs px-3 py-1.5 rounded-md font-mono font-black ${badgeClass}">${score}개 일치</span></div>`;
